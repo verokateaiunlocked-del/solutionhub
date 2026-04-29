@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution Hub - Report Issues & Track Progress</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-black: #000000;
+            --color-white: #ffffff;
+            --color-gray-50: #f9fafb;
+            --color-gray-100: #f3f4f6;
+            --color-gray-200: #e5e7eb;
+            --color-gray-300: #d1d5db;
+            --color-gray-400: #9ca3af;
+            --color-gray-500: #6b7280;
+            --color-red-500: #ef4444;
+            --color-red-600: #dc2626;
+            --color-red-700: #b91c1c;
+            --color-green-500: #22c55e;
+            --color-yellow-50: #fefce8;
+            --color-yellow-100: #fef3c7;
+            --color-yellow-400: #facc15;
+            --color-blue-500: #3b82f6;
+        }
+
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background-color: var(--color-white);
+            color: var(--color-black);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: var(--color-white);
+            border-bottom: 1px solid var(--color-gray-200);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--color-black);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+
+        /* Main Container */
+        .page-container {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .page-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== REPORT PAGE ===== */
+        .report-page {
+            max-width: 896px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        /* Progress Stepper */
+        .progress-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+        }
+
+        .stepper-item {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .stepper-item:last-child {
+            flex: none;
+        }
+
+        .stepper-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.875rem;
+            background-color: var(--color-gray-100);
+            color: var(--color-gray-400);
+            transition: all 0.3s ease;
+        }
+
+        .stepper-circle.active {
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+
+        .stepper-line {
+            height: 2px;
+            flex: 1;
+            margin: 0 1rem;
+            background-color: var(--color-gray-100);
+            transition: all 0.3s ease;
+        }
+
+        .stepper-line.active {
+            background-color: var(--color-black);
+        }
+
+        /* Step Content */
+        .step-content {
+            animation: slideInRight 0.3s ease;
+            space-y: 2rem;
+        }
+
+        .step-header {
+            margin-bottom: 2rem;
+        }
+
+        .step-header h2 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-header p {
+            color: var(--color-gray-500);
+            font-size: 0.875rem;
+        }
+
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-btn {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            border: 2px solid var(--color-gray-100);
+            background-color: var(--color-white);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category-btn:hover {
+            border-color: var(--color-gray-300);
+        }
+
+        .category-btn.selected {
+            border-color: var(--color-black);
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+
+        .category-icon {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sub-category Pills */
+        .subcategory-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-gray-100);
+        }
+
+        .subcategory-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--color-gray-400);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .subcategory-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .subcategory-pill {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            border: 1px solid var(--color-gray-200);
+            background-color: var(--color-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .subcategory-pill:hover {
+            border-color: var(--color-black);
+        }
+
+        .subcategory-pill.selected {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            border-color: var(--color-black);
+        }
+
+        /* Location Grid */
+        .location-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .location-section {
+            space-y: 1rem;
+        }
+
+        .location-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--color-gray-400);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: var(--color-gray-50);
+            border: 1px solid var(--color-gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--color-black);
+            background-color: var(--color-white);
+        }
+
+        textarea {
+            resize: none;
+            font-family: inherit;
+        }
+
+        /* File Upload Area */
+        .file-upload-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .file-upload-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed var(--color-gray-200);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--color-white);
+        }
+
+        .file-upload-btn:hover {
+            background-color: var(--color-gray-50);
+        }
+
+        .file-upload-btn input {
+            display: none;
+        }
+
+        .file-upload-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 2rem;
+            gap: 1rem;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-gray-500);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            color: var(--color-black);
+        }
+
+        .btn-danger {
+            background-color: var(--color-red-600);
+            color: var(--color-white);
+            padding: 1rem 3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: var(--color-red-700);
+            transform: scale(1.05);
+        }
+
+        .btn-danger:disabled {
+            background-color: var(--color-gray-200);
+            color: var(--color-gray-400);
+            cursor: not-allowed;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--color-gray-50);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--color-gray-100);
+            margin-bottom: 2rem;
+        }
+
+        .toggle-label {
+            flex: 1;
+        }
+
+        .toggle-label h4 {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .toggle-label p {
+            font-size: 0.875rem;
+            color: var(--color-gray-500);
+        }
+
+        .switch {
+            width: 3.5rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background-color: var(--color-gray-300);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active {
+            background-color: var(--color-black);
+        }
+
+        .switch-thumb {
+            position: absolute;
+            top: 0.25rem;
+            left: 0.25rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: var(--color-white);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active .switch-thumb {
+            left: 1.75rem;
+        }
+
+        /* Collapsible Section */
+        .collapsible-section {
+            max-height: 500px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible-section.hidden {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Alert Box */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .alert-warning {
+            background-color: var(--color-yellow-100);
+            border: 1px solid var(--color-yellow-100);
+            color: #92400e;
+        }
+
+        /* Success Page */
+        .success-page {
+            max-width: 896px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 60vh;
+        }
+
+        .success-icon {
+            width: 6.25rem;
+            height: 6.25rem;
+            margin: 2rem auto;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .success-page h2 {
+            font-size: 2.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .tracking-id-box {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+        }
+
+        .success-page p {
+            color: var(--color-gray-500);
+            margin-bottom: 2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .success-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .success-buttons button {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* ===== TRACK PAGE ===== */
+        .track-page {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .track-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .track-header h1 {
+            font-size: 2.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .track-search-form {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 28rem;
+            margin: 0 auto;
+        }
+
+        .track-search-form input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background-color: var(--color-gray-50);
+            border: 1px solid var(--color-gray-200);
+            border-radius: 0.75rem;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.05em;
+            font-size: 1.125rem;
+        }
+
+        .track-search-form button {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .track-search-form button:hover {
+            transform: scale(1.05);
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid var(--color-gray-200);
+            border-top-color: var(--color-black);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .searching-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 1.25rem;
+            gap: 1rem;
+        }
+
+        .searching-text {
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-gray-400);
+        }
+
+        /* Issue Card */
+        .issue-card {
+            background-color: var(--color-white);
+            border: 2px solid var(--color-black);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            animation: slideInRight 0.3s ease;
+        }
+
+        .issue-header {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .issue-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .issue-id-section {
+            flex: 1;
+        }
+
+        .issue-id-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--color-gray-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .issue-id {
+            font-size: 1.875rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .status-new {
+            background-color: var(--color-red-500);
+            color: var(--color-white);
+        }
+
+        .status-in-progress {
+            background-color: var(--color-yellow-400);
+            color: var(--color-black);
+        }
+
+        .status-escalated {
+            background-color: var(--color-red-500);
+            color: var(--color-white);
+        }
+
+        .status-resolved {
+            background-color: var(--color-green-500);
+            color: var(--color-white);
+        }
+
+        .issue-body {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+            .issue-body {
+                grid-template-columns: 250px 1fr;
+            }
+        }
+
+        .issue-sidebar {
+            padding: 2rem;
+            border-right: 1px solid var(--color-gray-100);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .info-item {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--color-gray-400);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .issue-content {
+            padding: 2rem;
+            space-y: 3rem;
+        }
+
+        .content-section {
+            space-y: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .section-label {
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--color-gray-400);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .issue-description {
+            font-size: 1.125rem;
+            color: var(--color-gray-600);
+            line-height: 1.8;
+            font-style: italic;
+            border-left: 4px solid var(--color-gray-100);
+            padding-left: 1.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            space-y: 2rem;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .timeline-marker {
+            position: relative;
+            width: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 4px;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        .timeline-dot.first {
+            background-color: var(--color-black);
+        }
+
+        .timeline-dot.other {
+            background-color: var(--color-green-500);
+        }
+
+        .timeline-line {
+            width: 2px;
+            height: 3rem;
+            background-color: var(--color-gray-100);
+            margin-top: 0.5rem;
+        }
+
+        .timeline-content {
+            flex: 1;
+            margin-top: -2px;
+        }
+
+        .timeline-status {
+            font-size: 0.875rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: var(--color-gray-400);
+            font-weight: normal;
+            margin-left: 0.5rem;
+        }
+
+        .timeline-note {
+            font-size: 0.875rem;
+            color: var(--color-gray-500);
+            margin-top: 0.25rem;
+        }
+
+        .timeline-pending {
+            opacity: 0.5;
+        }
+
+        .authority-box {
+            background-color: var(--color-gray-50);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .authority-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .authority-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: var(--color-black);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+        }
+
+        .authority-text {
+            flex: 1;
+        }
+
+        .authority-label {
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--color-gray-400);
+        }
+
+        .authority-name {
+            font-size: 0.875rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .routing-note {
+            margin-top: 5rem;
+            padding: 2rem;
+            border: 1px solid var(--color-gray-200);
+            border-radius: 1rem;
+            background-color: #fafafa;
+        }
+
+        .routing-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .routing-badge {
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--color-black);
+            color: var(--color-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            transform: rotate(3deg);
+        }
+
+        .routing-header h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .routing-description {
+            color: var(--color-gray-500);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            max-width: 50rem;
+        }
+
+        /* ===== AUTHORITY DASHBOARD ===== */
+        .authority-page {
+            background-color: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 3rem 1rem;
+        }
+
+        .dashboard-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-header-content {
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-end;
+            }
+        }
+
+        .dashboard-title-section {
+            flex: 1;
+        }
+
+        .certified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--color-gray-500);
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-title {
+            font-size: 2.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-title {
+                font-size: 3.75rem;
+            }
+        }
+
+        .dashboard-subtitle {
+            color: var(--color-gray-400);
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        .dashboard-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-buttons {
+                flex-wrap: nowrap;
+            }
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-gray-500);
+            border: 1px solid transparent;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .dashboard-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            margin-top: -2.5rem;
+            margin-bottom: 5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--color-white);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--color-gray-100);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 1.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            color: var(--color-green-500);
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-gray-400);
+        }
+
+        /* Issues List */
+        .issues-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .issues-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .issue-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .issue-list-header h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .filter-buttons {
+            display: flex;
+            background-color: var(--color-white);
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--color-gray-200);
+        }
+
+        .filter-btn {
+            padding: 0.375rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-gray-400);
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+
+        .issue-item {
+            background-color: var(--color-white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--color-gray-100);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .issue-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .issue-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .issue-item-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .issue-item-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) inset;
+            transform: scale(0.95);
+        }
+
+        .issue-item-icon.water {
+            background-color: var(--color-blue-500);
+        }
+
+        .issue-item-icon.infrastructure {
+            background-color: var(--color-red-500);
+        }
+
+        .issue-item:hover .issue-item-icon {
+            transform: scale(1);
+        }
+
+        .issue-item-text {
+            flex: 1;
+        }
+
+        .issue-id-inline {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .issue-status-inline {
+            display: inline-block;
+            font-size: 0.625rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 0.75rem;
+        }
+
+        .status-new-inline {
+            background-color: #fee2e2;
+            color: var(--color-red-600);
+        }
+
+        .status-in-progress-inline {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .issue-location {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        .issue-description-text {
+            font-size: 0.75rem;
+            color: var(--color-gray-500);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .issue-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.75rem 1rem;
+            background-color: var(--color-black);
+            color: var(--color-white);
+            border-radius: 0.75rem;
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-small:hover {
+            transform: scale(1.05);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--color-white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--color-gray-100);
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            font-size: 1.125rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-item {
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        .sidebar-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .sidebar-label {
+            font-size: 0.625rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--color-gray-400);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading States */
+        .hidden {
+            display: none !important;
+        }
+
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">Solution Hub</div>
+            <ul class="nav-links">
+                <li><a href="#" data-page="report" class="nav-link active">Report Issue</a></li>
+                <li><a href="#" data-page="track" class="nav-link">Track Report</a></li>
+                <li><a href="#" data-page="dashboard" class="nav-link">Authority Hub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Pages Container -->
+    <div class="pages-wrapper">
+        <!-- REPORT PAGE -->
+        <div id="report-page" class="page-container active">
+            <div class="report-page">
+                <!-- Progress Stepper -->
+                <div class="progress-stepper">
+                    <div class="stepper-item">
+                        <div class="stepper-circle active" id="step-1-circle">1</div>
+                        <div class="stepper-line" id="step-line-1"></div>
+                    </div>
+                    <div class="stepper-item">
+                        <div class="stepper-circle" id="step-2-circle">2</div>
+                        <div class="stepper-line" id="step-line-2"></div>
+                    </div>
+                    <div class="stepper-item">
+                        <div class="stepper-circle" id="step-3-circle">3</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Category Selection -->
+                <div id="step-1-content" class="step-content">
+                    <div class="step-header">
+                        <h2>Report an Issue</h2>
+                        <p>Select the general area of your concern.</p>
+                    </div>
+
+                    <div class="category-grid" id="category-grid">
+                        <!-- Categories will be inserted here -->
+                    </div>
+
+                    <div id="subcategory-section" class="subcategory-section hidden">
+                        <label class="subcategory-label">Specific Type</label>
+                        <div class="subcategory-pills" id="subcategory-pills">
+                            <!-- Sub-categories will be inserted here -->
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <div></div>
+                        <button class="btn-primary" onclick="nextStep()" id="step1-next">
+                            Continue
+                            <span style="display: inline-block; margin-left: 5px;">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Location & Details -->
+                <div id="step-2-content" class="step-content hidden">
+                    <div class="step-header">
+                        <h2>Tell Us More</h2>
+                        <p>Where and what is happening?</p>
+                    </div>
+
+                    <div class="location-grid">
+                        <div class="location-section">
+                            <label class="location-label">📍 Location</label>
+                            <select id="city-select" onchange="onCityChange()">
+                                <option value="">Select Council...</option>
+                            </select>
+                            <select id="area-select" onchange="onAreaChange()">
+                                <option value="">Select Area...</option>
+                            </select>
+                        </div>
+
+                        <div class="location-section">
+                            <label class="location-label">📎 Attachments & Audio</label>
+                            <div class="file-upload-grid">
+                                <label class="file-upload-btn">
+                                    <span class="file-upload-icon">🖼️</span>
+                                    <span style="font-size: 0.625rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Photo / Video</span>
+                                    <input type="file" id="file-upload" accept="image/*,video/*">
+                                </label>
+                                <button class="file-upload-btn" onclick="startRecording()">
+                                    <span class="file-upload-icon">🎤</span>
+                                    <span style="font-size: 0.625rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Voice Note</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="location-section">
+                        <label class="location-label">📝 Details</label>
+                        <textarea id="description-input" rows="5" placeholder="Please provide as much detail as possible..."></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="prevStep()">
+                            <span style="display: inline-block; margin-right: 5px;">←</span>
+                            Back
+                        </button>
+                        <button class="btn-primary" onclick="nextStep()" id="step2-next">
+                            Continue
+                            <span style="display: inline-block; margin-left: 5px;">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Contact Info & Submit -->
+                <div id="step-3-content" class="step-content hidden">
+                    <div class="step-header">
+                        <h2>Verification</h2>
+                        <p>How would you like researchers to identify you?</p>
+                    </div>
+
+                    <div class="toggle-switch">
+                        <div class="toggle-label">
+                            <h4>Anonymous</h4>
+                            <p>Your details will be hidden from everyone.</p>
+                        </div>
+                        <div class="switch" id="anonymous-toggle" onclick="toggleAnonymous()">
+                            <div class="switch-thumb"></div>
+                        </div>
+                    </div>
+
+                    <div id="contact-section" class="collapsible-section hidden">
+                        <div style="background-color: var(--color-gray-50); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--color-gray-100);">
+                            <div class="form-grid">
+                                <input type="text" id="full-name" placeholder="Full Name">
+                                <input type="tel" id="phone" placeholder="Phone Number">
+                            </div>
+                            <input type="email" id="email" placeholder="Email (Optional)">
+                        </div>
+                    </div>
+
+                    <div id="anonymous-badge" style="background-color: var(--color-white); padding: 1rem; border-radius: 0.5rem; border: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1rem;">🛡️</span>
+                        <span style="font-size: 0.75rem; font-family: 'Courier New', monospace; color: var(--color-gray-500);">SYSTEM GENERATED: SH-TEMP-XXXX</span>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>Verification:</strong> Your report will be securely stored and can never be deleted or hidden by authorities.
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="prevStep()">
+                            <span style="display: inline-block; margin-right: 5px;">←</span>
+                            Back
+                        </button>
+                        <button class="btn-danger" onclick="submitReport()" id="submit-btn">
+                            Submit Issue
+                            <span style="display: inline-block; margin-left: 5px;">✉️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success Page -->
+                <div id="success-page" class="success-page hidden">
+                    <div class="success-icon">✅</div>
+                    <h2>Success!</h2>
+                    <div class="tracking-id-box" id="tracking-id-display">SH-45821</div>
+                    <p>Your report has been assigned to the <strong id="assigned-authority">Yaoundé I Council – Infrastructure Unit</strong></p>
+                    <div class="success-buttons">
+                        <button class="btn-primary" onclick="goToTrack()">Track Status</button>
+                        <button style="border: 2px solid var(--color-black); background-color: var(--color-white); color: var(--color-black); padding: 0.75rem 1.5rem; font-size: 0.75rem;" onclick="goHome()">Go Home</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRACK PAGE -->
+        <div id="track-page" class="page-container">
+            <div class="track-page">
+                <div class="track-header">
+                    <h1>Track Your Report</h1>
+                    <form class="track-search-form" onsubmit="searchReport(event)">
+                        <input type="text" id="tracking-id-input" placeholder="Enter Tracking ID (e.g., SH-45821)">
+                        <button type="submit">🔍</button>
+                    </form>
+                </div>
+
+                <div id="track-searching" class="searching-container hidden">
+                    <div class="spinner"></div>
+                    <span class="searching-text">Verifying Tracking ID...</span>
+                </div>
+
+                <div id="track-result" class="hidden">
+                    <!-- Issue card will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTHORITY DASHBOARD -->
+        <div id="dashboard-page" class="page-container authority-page">
+            <div class="dashboard-header">
+                <div class="dashboard-header-content">
+                    <div class="dashboard-title-section">
+                        <div class="certified-badge">
+                            🛡️ Certified Authority Access
+                        </div>
+                        <h1 class="dashboard-title">Authority Hub</h1>
+                        <p class="dashboard-subtitle">Yaoundé I Council – Infrastructure Unit</p>
+                    </div>
+                    <div class="dashboard-buttons">
+                        <button class="btn-primary">
+                            Generate Report
+                            <span style="margin-left: 5px;">📊</span>
+                        </button>
+                        <button class="btn-secondary" style="background-color: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: var(--color-white); padding: 0.75rem 1.5rem;">
+                            Unit Settings
+                            <span style="margin-left: 5px;">⚙️</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-main">
+                <!-- Stats Grid -->
+                <div class="stats-grid" id="stats-grid">
+                    <!-- Stats will be inserted here -->
+                </div>
+
+                <!-- Issues Section -->
+                <div class="issues-container">
+                    <div class="issues-list" style="grid-column: span 2;">
+                        <div class="issue-list-header">
+                            <h3>Active Assignments</h3>
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" onclick="filterIssues('all')">All</button>
+                                <button class="filter-btn" onclick="filterIssues('urgent')">Urgent</button>
+                                <button class="filter-btn" onclick="filterIssues('overdue')">Overdue</button>
+                            </div>
+                        </div>
+                        <div id="issues-list-container">
+                            <!-- Issues will be inserted here -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar">
+                        <h3>Dashboard Info</h3>
+                        <div class="sidebar-item">
+                            <div class="sidebar-label">Total Assigned</div>
+                            <div class="sidebar-value">24 Issues</div>
+                        </div>
+                        <div class="sidebar-item">
+                            <div class="sidebar-label">Resolution Rate</div>
+                            <div class="sidebar-value">92%</div>
+                        </div>
+                        <div class="sidebar-item">
+                            <div class="sidebar-label">Avg Response Time</div>
+                            <div class="sidebar-value">4.2 hours</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data & State Management
+        const CATEGORIES = [
+            {
+                id: 'infrastructure',
+                label: 'Infrastructure',
+                icon: '🏗️',
+                subOptions: ['Road Damage', 'Bridge Issues', 'Drainage Problems', 'Street Lighting']
+            },
+            {
+                id: 'water',
+                label: 'Water Supply',
+                icon: '💧',
+                subOptions: ['No Water', 'Contaminated Water', 'Burst Pipes', 'Billing Issues']
+            },
+            {
+                id: 'health',
+                label: 'Health',
+                icon: '🏥',
+                subOptions: ['Equipment Shortage', 'Staff Issues', 'Facility Damage', 'Medicine Supply']
+            },
+            {
+                id: 'security',
+                label: 'Security',
+                icon: '🛡️',
+                subOptions: ['Theft', 'Assault', 'Property Damage', 'Safety Concern']
+            },
+            {
+                id: 'governance',
+                label: 'Governance',
+                icon: '🏛️',
+                subOptions: ['Corruption', 'Misallocation', 'Documentation', 'Transparency']
+            },
+            {
+                id: 'environment',
+                label: 'Environment',
+                icon: '🍃',
+                subOptions: ['Pollution', 'Waste', 'Wildlife', 'Deforestation']
+            }
+        ];
+
+        const CITIES = [
+            'Yaoundé I',
+            'Yaoundé II',
+            'Yaoundé III',
+            'Yaoundé IV',
+            'Yaoundé V',
+            'Yaoundé VI',
+            'Douala I',
+            'Douala II',
+            'Douala III'
+        ];
+
+        const AREAS = {
+            'Yaoundé I': ['Etoudi', 'Mvog-Ebogo', 'Mvog-Mbi', 'Nkoabang'],
+            'Yaoundé II': ['Biyem-Assi', 'Nlongkak', 'Akok-Sokoudjou'],
+            'Yaoundé III': ['Melen', 'Hippodrome', 'Ahala'],
+            'Yaoundé IV': ['Ntaba', 'Olembé', 'Kodengui'],
+            'Yaoundé V': ['Mendong', 'Mbankolo', 'Obili'],
+            'Yaoundé VI': ['Elig-Essono', 'Nkil', 'Mokolo'],
+            'Douala I': ['Akwa', 'Plateau Atemengue'],
+            'Douala II': ['Bonanjo', 'PK12'],
+            'Douala III': ['Bassa', 'New Bell', 'Logbaba']
+        };
+
+        const MOCK_ISSUES = [
+            {
+                id: 'SH-45821',
+                category: 'infrastructure',
+                status: 'escalated',
+                location: { city: 'Yaoundé I', area: 'Etoudi' },
+                description: 'Major road collapse blocking transit.',
+                createdAt: '2026-04-20T10:30:00Z',
+                history: [
+                    { status: 'new', date: '2026-04-20T10:30:00Z', note: 'Report submitted via Web.' },
+                    { status: 'in_progress', date: '2026-04-21T09:00:00Z', note: 'Yaoundé I Council acknowledged - Local Unit assigned.' },
+                    { status: 'escalated', date: '2026-04-23T10:30:00Z', note: 'FORCED ESCALATION: Local unit failed to resolve within 48h SLA. Routed to Regional Delegate.' },
+                    { status: 'in_progress', date: '2026-04-24T14:20:00Z', note: 'Regional team site assessment completed. Budget approved for emergency fix.' }
+                ]
+            },
+            {
+                id: 'SH-45822',
+                category: 'water',
+                status: 'new',
+                location: { city: 'Douala I', area: 'Akwa' },
+                description: 'Water contamination in residential area.',
+                createdAt: '2026-04-22T08:15:00Z',
+                history: [
+                    { status: 'new', date: '2026-04-22T08:15:00Z', note: 'Report submitted via Web.' }
+                ]
+            }
+        ];
+
+        let currentStep = 1;
+        let currentPage = 'report';
+        let formData = {
+            category: '',
+            subCategory: '',
+            city: '',
+            area: '',
+            description: '',
+            isAnonymous: true,
+            fullName: '',
+            phone: '',
+            email: '',
+            trackingId: ''
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeReport();
+            initializeNavigation();
+            initializeDashboard();
+        });
+
+        // Navigation
+        function initializeNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.dataset.page;
+                    switchPage(page);
+                });
+            });
+        }
+
+        function switchPage(page) {
+            // Hide all pages
+            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById(page + '-page').classList.add('active');
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            
+            currentPage = page;
+            
+            // Reset report page if switching to it
+            if (page === 'report') {
+                resetReportPage();
+            }
+        }
+
+        // REPORT PAGE FUNCTIONS
+        function initializeReport() {
+            // Populate categories
+            const categoryGrid = document.getElementById('category-grid');
+            CATEGORIES.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.innerHTML = `
+                    <span class="category-icon">${cat.icon}</span>
+                    <span>${cat.label}</span>
+                `;
+                btn.onclick = () => selectCategory(cat.id);
+                categoryGrid.appendChild(btn);
+            });
+
+            // Populate cities
+            const citySelect = document.getElementById('city-select');
+            CITIES.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+
+            // Set initial city
+            citySelect.value = 'Yaoundé I';
+            onCityChange();
+        }
+
+        function selectCategory(categoryId) {
+            formData.category = categoryId;
+            formData.subCategory = '';
+
+            // Update button states
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.closest('.category-btn').classList.add('selected');
+
+            // Show subcategories
+            const category = CATEGORIES.find(c => c.id === categoryId);
+            const subcategorySection = document.getElementById('subcategory-section');
+            const subcategoryPills = document.getElementById('subcategory-pills');
+            
+            subcategoryPills.innerHTML = '';
+            category.subOptions.forEach(sub => {
+                const pill = document.createElement('button');
+                pill.className = 'subcategory-pill';
+                pill.textContent = sub;
+                pill.type = 'button';
+                pill.onclick = (e) => {
+                    e.preventDefault();
+                    selectSubCategory(sub);
+                };
+                subcategoryPills.appendChild(pill);
+            });
+
+            subcategorySection.classList.remove('hidden');
+        }
+
+        function selectSubCategory(subCategory) {
+            formData.subCategory = subCategory;
+            
+            document.querySelectorAll('.subcategory-pill').forEach(pill => {
+                pill.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function onCityChange() {
+            const city = document.getElementById('city-select').value;
+            formData.city = city;
+            formData.area = '';
+
+            const areaSelect = document.getElementById('area-select');
+            areaSelect.innerHTML = '<option value="">Select Area...</option>';
+            
+            if (city && AREAS[city]) {
+                AREAS[city].forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area;
+                    option.textContent = area;
+                    areaSelect.appendChild(option);
+                });
+            }
+        }
+
+        function onAreaChange() {
+            formData.area = document.getElementById('area-select').value;
+        }
+
+        function toggleAnonymous() {
+            formData.isAnonymous = !formData.isAnonymous;
+            
+            const toggle = document.getElementById('anonymous-toggle');
+            const contactSection = document.getElementById('contact-section');
+            const anonymousBadge = document.getElementById('anonymous-badge');
+            
+            toggle.classList.toggle('active');
+            
+            if (formData.isAnonymous) {
+                contactSection.classList.add('hidden');
+                anonymousBadge.classList.remove('hidden');
+            } else {
+                contactSection.classList.remove('hidden');
+                anonymousBadge.classList.add('hidden');
+            }
+        }
+
+        function nextStep() {
+            // Validation
+            if (currentStep === 1 && !formData.category) {
+                alert('Please select a category');
+                return;
+            }
+            if (currentStep === 2 && (!formData.city || !formData.area || !formData.description)) {
+                alert('Please fill all required fields');
+                return;
+            }
+            if (currentStep === 3 && !formData.isAnonymous && (!formData.fullName || !formData.phone)) {
+                alert('Please fill in your name and phone number');
+                return;
+            }
+
+            currentStep++;
+            updateStepUI();
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepUI();
+            }
+        }
+
+        function updateStepUI() {
+            // Hide all steps
+            document.getElementById('step-1-content').classList.add('hidden');
+            document.getElementById('step-2-content').classList.add('hidden');
+            document.getElementById('step-3-content').classList.add('hidden');
+            document.getElementById('success-page').classList.add('hidden');
+
+            // Show current step
+            if (currentStep <= 3) {
+                document.getElementById(`step-${currentStep}-content`).classList.remove('hidden');
+            }
+
+            // Update stepper circles
+            for (let i = 1; i <= 3; i++) {
+                const circle = document.getElementById(`step-${i}-circle`);
+                const line = document.getElementById(`step-line-${i}`);
+                
+                circle.classList.toggle('active', i <= currentStep);
+                if (line) line.classList.toggle('active', i < currentStep);
+            }
+        }
+
+        function submitReport() {
+            // Get form values
+            formData.description = document.getElementById('description-input').value;
+            if (!formData.isAnonymous) {
+                formData.fullName = document.getElementById('full-name').value;
+                formData.phone = document.getElementById('phone').value;
+                formData.email = document.getElementById('email').value;
+            }
+
+            // Generate tracking ID
+            const trackingId = `SH-${Math.floor(10000 + Math.random() * 90000)}`;
+            formData.trackingId = trackingId;
+
+            // Show success page
+            document.getElementById('success-page').classList.remove('hidden');
+            document.getElementById('step-3-content').classList.add('hidden');
+            document.getElementById('tracking-id-display').textContent = trackingId;
+
+            // Update assigned authority
+            const category = CATEGORIES.find(c => c.id === formData.category);
+            const authority = `${formData.city || 'Yaoundé I'} Council – ${category?.label || 'General'} Unit`;
+            document.getElementById('assigned-authority').textContent = authority;
+        }
+
+        function resetReportPage() {
+            currentStep = 1;
+            formData = {
+                category: '',
+                subCategory: '',
+                city: 'Yaoundé I',
+                area: '',
+                description: '',
+                isAnonymous: true,
+                fullName: '',
+                phone: '',
+                email: '',
+                trackingId: ''
+            };
+            
+            // Reset UI
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('subcategory-section').classList.add('hidden');
+            document.getElementById('contact-section').classList.add('hidden');
+            document.getElementById('anonymous-badge').classList.remove('hidden');
+            document.getElementById('anonymous-toggle').classList.add('active');
+            document.getElementById('description-input').value = '';
+            document.getElementById('full-name').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('success-page').classList.add('hidden');
+            document.getElementById('step-1-content').classList.remove('hidden');
+            
+            updateStepUI();
+        }
+
+        function goToTrack() {
+            document.getElementById('tracking-id-input').value = formData.trackingId;
+            switchPage('track');
+            searchReport(new Event('submit'));
+        }
+
+        function goHome() {
+            resetReportPage();
+            switchPage('report');
+        }
+
+        // TRACK PAGE FUNCTIONS
+        function searchReport(e) {
+            if (e) e.preventDefault();
+            
+            const trackingId = document.getElementById('tracking-id-input').value.toUpperCase();
+            if (!trackingId) return;
+
+            document.getElementById('track-searching').classList.remove('hidden');
+            document.getElementById('track-result').classList.add('hidden');
+
+            // Simulate API call
+            setTimeout(() => {
+                const issue = MOCK_ISSUES.find(i => i.id === trackingId);
+                
+                if (issue) {
+                    displayIssueCard(issue);
+                    document.getElementById('track-result').classList.remove('hidden');
+                } else {
+                    alert('Tracking ID not found. Try: SH-45821 or SH-45822');
+                }
+                
+                document.getElementById('track-searching').classList.add('hidden');
+            }, 1500);
+        }
+
+        function displayIssueCard(issue) {
+            const resultDiv = document.getElementById('track-result');
+            const category = CATEGORIES.find(c => c.id === issue.category);
+            
+            let statusClass = `status-${issue.status}`;
+            let statusText = issue.status.replace('_', ' ').toUpperCase();
+
+            const historyHTML = issue.history.map((h, i) => `
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <div class="timeline-dot ${i === 0 ? 'first' : 'other'}"></div>
+                        ${i < issue.history.length - 1 ? '<div class="timeline-line"></div>' : ''}
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-status">
+                            ${h.status.replace('_', ' ')}
+                            <span class="timeline-date">${new Date(h.date).toLocaleString()}</span>
+                        </div>
+                        <div class="timeline-note">${h.note}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            resultDiv.innerHTML = `
+                <div class="issue-card">
+                    <div class="issue-header">
+                        <div class="issue-id-section">
+                            <div class="issue-id-label">Tracking ID</div>
+                            <div class="issue-id">${issue.id}</div>
+                        </div>
+                        <div class="status-badge ${statusClass}">${statusText}</div>
+                    </div>
+                    
+                    <div class="issue-body">
+                        <div class="issue-sidebar">
+                            <div class="info-item">
+                                <div class="info-label">📍 Location</div>
+                                <div class="info-value">${issue.location.city}, ${issue.location.area}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">📅 Submitted On</div>
+                                <div class="info-value">${new Date(issue.createdAt).toLocaleDateString()}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">🛡️ Reporter</div>
+                                <div class="info-value">Anonymous</div>
+                            </div>
+                        </div>
+                        
+                        <div class="issue-content">
+                            <div class="content-section">
+                                <div class="section-label">Initial Report</div>
+                                <div class="issue-description">"${issue.description}"</div>
+                            </div>
+                            
+                            <div class="content-section">
+                                <div class="section-label">Escalation Timeline</div>
+                                <div class="timeline">
+                                    ${historyHTML}
+                                    <div class="timeline-item timeline-pending">
+                                        <div class="timeline-marker">
+                                            <div class="timeline-dot" style="border: 2px dashed var(--color-gray-300); background-color: transparent;"></div>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="section-label">Next Step: Resolution Planning</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="authority-box">
+                                <div class="authority-info">
+                                    <div class="authority-icon">✓</div>
+                                    <div class="authority-text">
+                                        <div class="authority-label">Assigned Authority</div>
+                                        <div class="authority-name">${issue.location.city} Council – ${category?.label || 'General'} Unit</div>
+                                    </div>
+                                </div>
+                                <button class="filter-btn" style="padding: 0.5rem 1rem; background-color: var(--color-white); border: 1px solid var(--color-gray-200);">Contact Unit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="routing-note">
+                    <div class="routing-header">
+                        <div class="routing-badge">HUB</div>
+                        <h3>Solution Hub Routing</h3>
+                    </div>
+                    <p class="routing-description">
+                        Your report is secured through <strong>Solution Hub Easy Fix</strong>. Our system ensures that once a report is filed, it can never be deleted or hidden by local officials until a multi-party resolution is verified.
+                    </p>
+                </div>
+            `;
+        }
+
+        // DASHBOARD FUNCTIONS
+        function initializeDashboard() {
+            // Populate stats
+            const stats = [
+                { label: 'Assigned Issues', value: '24', icon: '📊' },
+                { label: 'Average Response', value: '4.2h', icon: '⏱️' },
+                { label: 'Pending Urgency', value: '7', icon: '⚠️' },
+                { label: 'Resolution Rate', value: '92%', icon: '✓' }
+            ];
+
+            const statsGrid = document.getElementById('stats-grid');
+            stats.forEach((stat, i) => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <div class="stat-header">
+                        <div class="stat-icon">${stat.icon}</div>
+                        <span class="stat-change">+12%</span>
+                    </div>
+                    <div>
+                        <div class="stat-value">${stat.value}</div>
+                        <div class="stat-label">${stat.label}</div>
+                    </div>
+                `;
+                statsGrid.appendChild(card);
+            });
+
+            // Populate issues list
+            populateIssuesList();
+        }
+
+        function populateIssuesList() {
+            const container = document.getElementById('issues-list-container');
+            container.innerHTML = '';
+
+            MOCK_ISSUES.forEach(issue => {
+                const category = CATEGORIES.find(c => c.id === issue.category);
+                const statusClass = `status-${issue.status}-inline`;
+                const statusText = issue.status.replace('_', ' ').toUpperCase();
+                const iconClass = issue.category === 'water' ? 'water' : 'infrastructure';
+
+                const item = document.createElement('div');
+                item.className = 'issue-item';
+                item.innerHTML = `
+                    <div class="issue-item-content">
+                        <div class="issue-item-icon ${iconClass}">
+                            ${issue.category === 'water' ? '💧' : '⚠️'}
+                        </div>
+                        <div class="issue-item-text">
+                            <div>
+                                <span class="issue-id-inline">${issue.id}</span>
+                                <span class="issue-status-inline ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="issue-location">${issue.location.area} – ${category?.label} Issue</div>
+                            <div class="issue-description-text">${issue.description}</div>
+                        </div>
+                    </div>
+                    <div class="issue-actions">
+                        <button class="btn-small">
+                            Acknowledge ✓
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function filterIssues(filter) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            // Filter logic would go here
+        }
+
+        function startRecording() {
+            alert('Voice recording feature would be implemented with Web Audio API');
+        }
+    </script>
+</body>
+</html>
